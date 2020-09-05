@@ -1,0 +1,20 @@
+{% extends 'admin/base.html' %}
+
+{% load static %}
+
+{% block branding %}
+    <div class="head">
+        <h1 id="name">Admin Dashboard</h1>
+    </div>
+{% endblock %}
+
+{% with url_name=request.resolver_match.url_name %}
+
+    {% block sidebar %}
+{#        {% if request.path == "/admin/nx/counterdisplay/" %}#}
+{#            <h4>Namatullah OKKKKKKKKKK</h4>#}
+{#        {% endif %}#}
+{#    <h4>Url name is {{ url_name }}</h4>#}
+{#    <h4>Url name is   {{ request.path }}</h4>#}
+   {% endblock %}
+{% endwith %}

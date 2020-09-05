@@ -1,0 +1,150 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">
+    <style>
+        .flex-container {
+            display: flex;
+            flex-wrap: nowrap;
+        {#background-color: DodgerBlue;#}
+        }
+
+        .flex-container > div {
+            background-color: #f1f1f1;
+            width: 200px;
+            height: 70px;
+            margin: 10px;
+            padding-top: 18px;
+            text-align: center;
+            line-height: 15px;
+            font-size: 22px;
+        }
+
+        #parag {
+            padding-top: 25px;
+            font-size: 12px;
+        }
+
+    </style>
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+    <div id="content-main">
+        {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+
+        <div class="flex-container">
+            <div id="users">
+            </div>
+            <div id="request1">
+
+            </div>
+            <div id="request2">
+
+            </div>
+
+        </div>
+        <div class="flex-container" id="finance_rates">
+
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block sidebar %}
+    <div id="content-related">
+        <div class="module" id="recent-actions-module">
+            <h2>{% translate 'Recent actions' %}</h2>
+            <h3>{% translate 'My actions' %}</h3>
+            {% load log %}
+            {% get_admin_log 10 as admin_log for_user user %}
+            {% if not admin_log %}
+                <p>{% translate 'None available' %}</p>
+            {% else %}
+                <ul class="actionlist">
+                    {% for entry in admin_log %}
+                        <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                            {% if entry.is_deletion or not entry.get_admin_url %}
+                                {{ entry.object_repr }}
+                            {% else %}
+                                <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+                            {% endif %}
+                            <br>
+                            {% if entry.content_type %}
+                                <span class="mini quiet">{% filter capfirst %}
+                                    {{ entry.content_type.name }}{% endfilter %}</span>
+                            {% else %}
+                                <span class="mini quiet">{% translate 'Unknown content' %}</span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+{% block extraJavascritp %}
+    <script>
+
+
+        async function MainInfo(url) {
+            const response = await fetch(url);
+            const data = await response.json();
+            const users = document.getElementById("users");
+            const request1 = document.getElementById("request1");
+            const request2 = document.getElementById("request2");
+            const finance_rates = document.getElementById("finance_rates");
+            for (var key in data) {
+
+                if (key == "users") {
+                    users.innerHTML = `${data[key]} <p id="parag">Пользователей</p>`
+                } else if (key == "request1") {
+                    request1.innerHTML = `${data[key]} <p id="parag"> Активных</p>`
+                } else if (key == "request2") {
+                    request2.innerHTML = `${data[key]} <p id="parag"> Заявок в охидании</p>`
+                }
+                else if (key =="default_rate"){
+                    var array=data[key]
+                    array.forEach((va)=>{
+                        console.log(va[0]);
+                        finance_rates.innerHTML+=`
+                            <div>
+                            ${va[0]}
+                            <p id="parag"></p>
+                            ${va[1]}
+                            </div>
+                        `
+                    })
+                 }
+
+            }
+            {# }  #}
+            {##}
+            {#for (var key in data) {#}
+            {#    if (data.hasOwnProperty(key)) {#}
+            {#        const li = document.createElement("li");#}
+            {#        const span1 = document.createElement("span");#}
+            {#        const span2 = document.createElement("span");#}
+            {#        li.append(span1);#}
+            {#        li.append(span2);#}
+            {#        span1.appendChild(document.createTextNode(key));#}
+            {#        span2.appendChild(document.createTextNode(data[key]));#}
+            {#        element.append(li);#}
+            {#    }#}
+            {# } #}
+            {#return data;#}
+        }
+
+        MainInfo("/main/info/")
+
+    </script>
+{% endblock %}
